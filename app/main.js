@@ -1,3 +1,5 @@
+const EventBus = new Vue()
+
 const inputComponent = {
   template: `
     <input :placeholder="placeholder" 
@@ -9,7 +11,7 @@ const inputComponent = {
   },
   methods: {
     monitorEnterKey() {
-      this.$emit('add-note', {
+      EventBus.$emit('add-note', {
         note: this.input,
         timeStamp: new Date().toLocaleString()
       })
@@ -18,10 +20,25 @@ const inputComponent = {
   }
 }
 
+const noteCountComponent = {
+  template: `
+    <div class="note-count">Note count: <strong>{{ noteCount }}</strong></div>
+  `,
+  data() {
+    return {
+      noteCount: 0
+    }
+  },
+  created() {
+    EventBus.$on('add-note', event => this.noteCount++)
+  }
+}
+
 new Vue({
   el: '#app',
   components: {
-    'input-component': inputComponent
+    'input-component': inputComponent,
+    'note-count-component': noteCountComponent
   },
   data: {
     notes: [],
@@ -33,5 +50,8 @@ new Vue({
       this.notes.push(event.note)
       this.timestamps.push(event.timeStamp)
     }
+  },
+  created() {
+    EventBus.$on('add-note', event => this.addNote(event))
   }
 })
